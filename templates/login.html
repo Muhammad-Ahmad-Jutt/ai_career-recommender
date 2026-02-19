@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — CareerAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c12; --surface: #0d1420; --card: #111b2b;
+    --teal: #0ef0d0; --gold: #f5c842; --text: #e8edf5; --muted: #6b7d96;
+    --border: rgba(14,240,208,0.12); --error: #ff6b6b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif;
+    min-height:100vh; display:grid; grid-template-columns:1fr 1fr;
+  }
+  body::before {
+    content:''; position:fixed; inset:0;
+    background:radial-gradient(ellipse 70% 60% at 15% 50%, rgba(14,240,208,0.06) 0%, transparent 60%);
+    pointer-events:none;
+  }
+
+  /* LEFT PANEL */
+  .left-panel {
+    background:var(--surface); border-right:1px solid var(--border);
+    display:flex; flex-direction:column; justify-content:center;
+    padding:80px; position:relative; overflow:hidden;
+  }
+  .left-panel::before {
+    content:''; position:absolute; bottom:-80px; right:-80px;
+    width:320px; height:320px;
+    background:radial-gradient(circle,rgba(14,240,208,0.08),transparent 70%);
+    pointer-events:none;
+  }
+  .panel-logo { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--text); text-decoration:none; margin-bottom:60px; display:block; }
+  .panel-logo span { color:var(--teal); }
+  .panel-quote { font-family:'Playfair Display',serif; font-size:32px; font-weight:700; line-height:1.3; letter-spacing:-0.5px; margin-bottom:24px; }
+  .panel-quote em { font-style:normal; color:var(--teal); }
+  .panel-sub { color:var(--muted); font-size:15px; line-height:1.7; }
+  .testimonial {
+    margin-top:48px; background:rgba(14,240,208,0.05); border:1px solid var(--border);
+    border-radius:12px; padding:24px;
+  }
+  .testimonial p { font-size:14px; color:var(--text); line-height:1.6; margin-bottom:16px; font-style:italic; }
+  .testimonial-author { display:flex; align-items:center; gap:12px; }
+  .avatar { width:36px; height:36px; background:linear-gradient(135deg,var(--teal),#0a9e88); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:13px; color:var(--bg); }
+  .author-info small { display:block; color:var(--muted); font-size:11px; }
+
+  /* RIGHT PANEL */
+  .right-panel { display:flex; align-items:center; justify-content:center; padding:60px 80px; position:relative; }
+  .form-container { width:100%; max-width:400px; animation:fadeUp 0.5s ease both; }
+  .form-tag { font-size:11px; letter-spacing:2.5px; text-transform:uppercase; color:var(--teal); margin-bottom:12px; }
+  .form-container h1 { font-family:'Playfair Display',serif; font-size:36px; font-weight:700; letter-spacing:-1px; margin-bottom:8px; }
+  .form-container > p { color:var(--muted); font-size:14px; margin-bottom:36px; }
+  .form-container > p a { color:var(--teal); text-decoration:none; }
+
+  .form-group { margin-bottom:20px; }
+  label { display:block; font-size:13px; font-weight:500; color:var(--muted); margin-bottom:8px; letter-spacing:0.3px; }
+  input[type=text], input[type=email], input[type=password] {
+    width:100%; background:var(--surface); border:1px solid rgba(255,255,255,0.08);
+    border-radius:8px; padding:14px 16px; color:var(--text); font-family:'DM Sans',sans-serif;
+    font-size:15px; transition:all 0.2s; outline:none;
+  }
+  input:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(14,240,208,0.08); }
+  input::placeholder { color:var(--muted); }
+
+  .form-extras { display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+  .checkbox-group { display:flex; align-items:center; gap:8px; cursor:pointer; }
+  .checkbox-group input { width:auto; }
+  .checkbox-group span { font-size:13px; color:var(--muted); }
+  .forgot { font-size:13px; color:var(--teal); text-decoration:none; }
+  .forgot:hover { text-decoration:underline; }
+
+  .btn-submit {
+    width:100%; background:var(--teal); color:var(--bg); border:none;
+    padding:15px; border-radius:8px; font-size:15px; font-weight:600;
+    cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s;
+  }
+  .btn-submit:hover { transform:translateY(-1px); box-shadow:0 10px 30px rgba(14,240,208,0.25); }
+
+  .divider { display:flex; align-items:center; gap:16px; margin:24px 0; }
+  .divider::before, .divider::after { content:''; flex:1; height:1px; background:rgba(255,255,255,0.07); }
+  .divider span { color:var(--muted); font-size:12px; }
+
+  .btn-social {
+    width:100%; background:transparent; border:1px solid rgba(255,255,255,0.08);
+    color:var(--text); padding:13px; border-radius:8px; font-size:14px;
+    cursor:pointer; font-family:'DM Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:10px;
+    transition:border-color 0.2s;
+  }
+  .btn-social:hover { border-color:rgba(255,255,255,0.2); }
+
+  .signup-link { text-align:center; margin-top:28px; font-size:14px; color:var(--muted); }
+  .signup-link a { color:var(--teal); text-decoration:none; font-weight:500; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+  @media(max-width:768px) {
+    body { grid-template-columns:1fr; }
+    .left-panel { display:none; }
+    .right-panel { padding:40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <a href="/" class="panel-logo">Career<span>AI</span></a>
+  <h2 class="panel-quote">Your future starts with a single <em>step forward.</em></h2>
+  <p class="panel-sub">Sign in to access your personalized AI career dashboard and continue your journey.</p>
+  <div class="testimonial">
+    <p>"CareerAI helped me realize I was in the wrong field. Within 3 months of following its recommendations, I landed my dream internship in data science."</p>
+    <div class="testimonial-author">
+      <div class="avatar">S</div>
+      <div class="author-info"><strong>Sara K.</strong><small>Computer Science Student</small></div>
+    </div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="form-container">
+    <div class="form-tag">Welcome Back</div>
+    <h1>Sign In</h1>
+    <p>Don't have an account? <a href="/signup">Create one →</a></p>
+
+    <div class="form-group">
+      <label for="username">Username or Email</label>
+      <input type="text" id="username" placeholder="Enter your username or email">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter your password">
+    </div>
+
+    <div class="form-extras">
+      <label class="checkbox-group">
+        <input type="checkbox"> <span>Remember me</span>
+      </label>
+      <a href="#" class="forgot">Forgot password?</a>
+    </div>
+
+    <button class="btn-submit" onclick="window.location.href='/dashboard'">Sign In →</button>
+
+    <div class="divider"><span>or continue with</span></div>
+    <button class="btn-social">🌐 &nbsp;Continue with Google</button>
+
+    <div class="signup-link">New to CareerAI? <a href="/signup">Create a free account</a></div>
+  </div>
+</div>
+
+</body>
+</html>

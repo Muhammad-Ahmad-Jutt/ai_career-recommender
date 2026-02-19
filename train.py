@@ -15,7 +15,7 @@ from custom_transformers import MultiColumnTransformer
 # Load Dataset
 # -------------------------------
 df = pd.read_csv(
-    r"C:\Users\ahmad\Desktop\projects\github\career recommender\synthetic_career_recommendation_dataset (1).csv"
+    r"C:\Users\Muhammad Waseem\OneDrive\Desktop\ai_recommender\ai_career-recommender\synthetic_created_data.csv"
 )
 
 # -------------------------------

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Career Prediction — CareerAI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#080c12;--surface:#0d1420;--card:#111b2b;--teal:#0ef0d0;--gold:#f5c842;--text:#e8edf5;--muted:#6b7d96;--border:rgba(14,240,208,0.12);}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 30% 30%,rgba(14,240,208,0.05) 0%,transparent 60%);pointer-events:none;}
+
+  /* SIDEBAR */
+  .sidebar{width:255px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:28px 0;min-height:100vh;position:sticky;top:0;}
+  .sidebar-logo{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text);text-decoration:none;padding:0 24px 28px;display:block;border-bottom:1px solid var(--border);}
+  .sidebar-logo span{color:var(--teal);}
+  .sidebar-section{padding:20px 16px 0;}
+  .sidebar-label{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding:0 8px;}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:8px;color:var(--muted);text-decoration:none;font-size:14px;margin-bottom:3px;transition:all 0.15s;}
+  .nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text);}
+  .nav-item.active{background:rgba(14,240,208,0.08);color:var(--teal);}
+  .sidebar-bottom{margin-top:auto;padding:20px 16px;border-top:1px solid var(--border);}
+  .user-pill{display:flex;align-items:center;gap:10px;}
+  .user-avatar{width:34px;height:34px;background:linear-gradient(135deg,var(--teal),#0a9e88);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--bg);}
+
+  /* MAIN */
+  .main{flex:1;padding:44px;position:relative;z-index:1;}
+  .page-header{margin-bottom:36px;}
+  .page-tag{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--teal);margin-bottom:10px;}
+  .page-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;letter-spacing:-0.5px;margin-bottom:8px;}
+  .page-sub{color:var(--muted);font-size:15px;}
+
+  /* LAYOUT */
+  .prediction-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+
+  /* FORM */
+  .form-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;}
+  .form-section-title{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:16px;margin-top:24px;}
+  .form-section-title:first-child{margin-top:0;}
+  .form-group{margin-bottom:18px;}
+  label{display:block;font-size:13px;font-weight:500;color:var(--muted);margin-bottom:7px;}
+  input[type=text], select, textarea{width:100%;background:var(--surface);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:13px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;transition:all 0.2s;outline:none;}
+  input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(14,240,208,0.08);}
+  input::placeholder,textarea::placeholder{color:var(--muted);}
+  select option{background:var(--surface);}
+  textarea{resize:vertical;min-height:90px;line-height:1.6;}
+  .tag-input-wrapper{display:flex;flex-wrap:wrap;gap:8px;background:var(--surface);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:10px 12px;min-height:52px;cursor:text;}
+  .tag{display:inline-flex;align-items:center;gap:6px;background:rgba(14,240,208,0.1);border:1px solid rgba(14,240,208,0.2);color:var(--teal);padding:4px 10px;border-radius:6px;font-size:13px;}
+  .tag button{background:none;border:none;color:var(--teal);cursor:pointer;font-size:14px;line-height:1;padding:0;}
+  .tag-input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;min-width:120px;flex:1;}
+  .tag-input::placeholder{color:var(--muted);}
+  .btn-predict{width:100%;background:var(--teal);color:var(--bg);border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;}
+  .btn-predict:hover{transform:translateY(-1px);box-shadow:0 10px 30px rgba(14,240,208,0.25);}
+
+  /* RESULTS */
+  .results-panel{position:relative;}
+  .results-empty{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:60px 32px;text-align:center;}
+  .empty-icon{font-size:48px;margin-bottom:16px;opacity:0.5;}
+  .empty-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:8px;color:var(--muted);}
+  .empty-sub{font-size:14px;color:var(--muted);}
+  .results-content{display:none;}
+  .results-content.visible{display:block;animation:fadeUp 0.5s ease both;}
+
+  .result-header{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;margin-bottom:16px;}
+  .result-label{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:10px;}
+  .result-title{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;letter-spacing:-0.5px;margin-bottom:6px;}
+  .result-sub{font-size:14px;color:var(--muted);}
+  .top-match-score{display:flex;align-items:center;gap:16px;margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.05);}
+  .score-circle{width:60px;height:60px;border-radius:50%;background:rgba(14,240,208,0.08);border:2px solid var(--teal);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--teal);flex-shrink:0;}
+  .score-info h4{font-size:15px;font-weight:600;margin-bottom:3px;}
+  .score-info p{font-size:13px;color:var(--muted);}
+
+  .career-cards{display:flex;flex-direction:column;gap:10px;}
+  .career-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;transition:border-color 0.2s;}
+  .career-card:hover{border-color:rgba(14,240,208,0.25);}
+  .career-rank{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;}
+  .career-rank.first{background:rgba(245,200,66,0.1);color:var(--gold);}
+  .career-icon{font-size:22px;flex-shrink:0;}
+  .career-info{flex:1;}
+  .career-info h4{font-size:14px;font-weight:600;margin-bottom:3px;}
+  .career-info p{font-size:12px;color:var(--muted);}
+  .career-bar-wrap{flex:1;max-width:120px;}
+  .career-bar{height:4px;background:rgba(255,255,255,0.07);border-radius:2px;overflow:hidden;margin-bottom:4px;}
+  .career-bar-fill{height:100%;background:var(--teal);border-radius:2px;transition:width 1s ease;}
+  .career-bar-fill.gold{background:var(--gold);}
+  .career-pct{font-size:12px;font-weight:600;color:var(--teal);text-align:right;}
+  .career-pct.gold{color:var(--gold);}
+
+  /* LOADING */
+  .loading-overlay{display:none;position:absolute;inset:0;background:rgba(8,12,18,0.8);border-radius:16px;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:10;}
+  .loading-overlay.visible{display:flex;}
+  .spinner{width:40px;height:40px;border:3px solid rgba(14,240,208,0.15);border-top-color:var(--teal);border-radius:50%;animation:spin 0.8s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{font-size:14px;color:var(--muted);}
+
+  @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  @media(max-width:900px){.sidebar{display:none;}.main{padding:24px;}.prediction-layout{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="/" class="sidebar-logo">Career<span>AI</span></a>
+  <div class="sidebar-section">
+    <div class="sidebar-label">Main</div>
+    <a href="/dashboard" class="nav-item"><span>⊞</span> Dashboard</a>
+    <a href="/prediction" class="nav-item active"><span>🎯</span> Career Prediction</a>
+    <a href="#" class="nav-item"><span>📊</span> My Results</a>
+    <a href="#" class="nav-item"><span>📚</span> Resources</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:20px;">
+    <div class="sidebar-label">Account</div>
+    <a href="/about" class="nav-item"><span>ℹ️</span> About</a>
+    <a href="/contact" class="nav-item"><span>✉️</span> Contact</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="user-pill">
+      <div class="user-avatar">JD</div>
+      <div><div style="font-size:13px;font-weight:500;">John Doe</div><div style="font-size:11px;color:var(--muted);">CS Student</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div class="page-tag">✦ AI Analysis</div>
+    <h1 class="page-title">Career Prediction</h1>
+    <p class="page-sub">Fill in your details and let our AI find your best-fit career paths.</p>
+  </div>
+
+  <div class="prediction-layout">
+    <!-- FORM -->
+    <div class="form-panel">
+      <div class="form-section-title">Personal Information</div>
+      <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="ageInput" placeholder="e.g. 23" min="18" max="65" value="23">
+      </div>
+
+      <div class="form-section-title">Your Skills</div>
+      <div class="form-group">
+        <label>Technical & Soft Skills</label>
+        <div class="tag-input-wrapper" id="skillsWrapper" onclick="document.getElementById('skillInput').focus()">
+          <span class="tag">Python <button onclick="removeTag(this)">×</button></span>
+          <span class="tag">Problem Solving <button onclick="removeTag(this)">×</button></span>
+          <input type="text" class="tag-input" id="skillInput" placeholder="Add a skill, press Enter…" onkeydown="handleTagInput(event,'skillsWrapper')">
+        </div>
+      </div>
+
+      <div class="form-section-title">Your Personality Traits</div>
+      <div class="form-group">
+        <label>Describe Your Personality</label>
+        <div class="tag-input-wrapper" id="personalityWrapper" onclick="document.getElementById('personalityInput').focus()">
+          <span class="tag">Analytical <button onclick="removeTag(this)">×</button></span>
+          <span class="tag">Creative <button onclick="removeTag(this)">×</button></span>
+          <input type="text" class="tag-input" id="personalityInput" placeholder="Add a trait, press Enter…" onkeydown="handleTagInput(event,'personalityWrapper')">
+        </div>
+      </div>
+
+      <div class="form-section-title">Your Background</div>
+      <div class="form-group">
+        <label>Education Level</label>
+        <select id="educationInput">
+          <option value="">Select education level</option>
+          <option value="High School">High School</option>
+          <option value="Diploma">Diploma / Associate Degree</option>
+          <option value="Bachelor's Degree" selected>Bachelor's Degree</option>
+          <option value="Master's Degree">Master's Degree</option>
+          <option value="PhD">PhD</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Years of Experience</label>
+        <input type="number" id="experienceInput" placeholder="e.g. 2" min="0" max="50" value="0">
+      </div>
+
+      <button class="btn-predict" onclick="runPrediction()">🚀 &nbsp;Predict My Career Path</button>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-panel">
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Analyzing your profile with AI…</div>
+      </div>
+
+      <div class="results-empty" id="resultsEmpty">
+        <div class="empty-icon">🎯</div>
+        <div class="empty-title">Your results will appear here</div>
+        <div class="empty-sub">Fill in your details and click Predict to see your AI-powered career matches.</div>
+      </div>
+
+      <div class="results-content" id="resultsContent">
+        <div class="result-header">
+          <div class="result-label">✦ AI Recommendation</div>
+          <h2 class="result-title">Your Top Career Matches</h2>
+          <p class="result-sub">Based on your skills, interests, and educational background</p>
+          <div class="top-match-score">
+            <div class="score-circle" id="topScore">94%</div>
+            <div class="score-info">
+              <h4 id="topCareer">Software Engineer</h4>
+              <p>Highest confidence match</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="career-cards" id="careerCards">
+          <!-- filled by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function handleTagInput(e, wrapperId) {
+  if (e.key === 'Enter' && e.target.value.trim()) {
+    e.preventDefault();
+    const wrapper = document.getElementById(wrapperId);
+    const val = e.target.value.trim();
+    const tag = document.createElement('span');
+    tag.className = 'tag';
+    tag.innerHTML = `${val} <button onclick="removeTag(this)">×</button>`;
+    wrapper.insertBefore(tag, e.target);
+    e.target.value = '';
+  }
+}
+function removeTag(btn) { btn.parentElement.remove(); }
+
+function runPrediction() {
+  // Get form values
+  const age = document.getElementById('ageInput').value;
+  const education = document.getElementById('educationInput').value;
+  const experienceYears = document.getElementById('experienceInput').value;
+
+  // Get skills from tags
+  const skillTags = document.querySelectorAll('#skillsWrapper .tag');
+  const skills = Array.from(skillTags).map(tag => tag.textContent.replace('×', '').trim()).join(', ');
+
+  // Get personality traits from tags
+  const personalityTags = document.querySelectorAll('#personalityWrapper .tag');
+  const personalityTraits = Array.from(personalityTags).map(tag => tag.textContent.replace('×', '').trim()).join(', ');
+
+  // Validate
+  if (!education) {
+    alert('Please select your education level');
+    return;
+  }
+  if (!skills) {
+    alert('Please add at least one skill');
+    return;
+  }
+  if (!personalityTraits) {
+    alert('Please add at least one personality trait');
+    return;
+  }
+
+  // Hide empty state and show loading
+  document.getElementById('resultsEmpty').style.display = 'none';
+  document.getElementById('resultsContent').classList.remove('visible');
+  document.getElementById('loadingOverlay').classList.add('visible');
+
+  // Prepare data for API
+  const requestData = {
+    age: parseInt(age),
+    education: education,
+    skills: skills,
+    personality_traits: personalityTraits,
+    experience_years: parseInt(experienceYears)
+  };
+
+  console.log('Sending prediction request:', requestData);
+
+  // Call the API
+  fetch('/api/predict', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(requestData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log('Received response:', data);
+
+    if (data.success) {
+      // Update top career display
+      document.getElementById('topScore').textContent = data.top_match + '%';
+      document.getElementById('topCareer').textContent = data.top_career;
+
+      // Build career cards from actual results
+      buildResultsFromAPI(data.results);
+
+      // Hide loading and show results
+      document.getElementById('loadingOverlay').classList.remove('visible');
+      document.getElementById('resultsContent').classList.add('visible');
+    } else {
+      alert('Error: ' + data.error);
+      document.getElementById('loadingOverlay').classList.remove('visible');
+      document.getElementById('resultsEmpty').style.display = 'block';
+    }
+  })
+  .catch(error => {
+    console.error('Prediction error:', error);
+    alert('Failed to get prediction. Please try again.');
+    document.getElementById('loadingOverlay').classList.remove('visible');
+    document.getElementById('resultsEmpty').style.display = 'block';
+  });
+}
+
+function buildResultsFromAPI(results) {
+  const container = document.getElementById('careerCards');
+  container.innerHTML = '';
+
+  results.forEach(function(career, i) {
+    const card = document.createElement('div');
+    card.className = 'career-card';
+    card.style.animationDelay = (i * 0.08) + 's';
+
+    const rankClass = i === 0 ? 'career-rank first' : 'career-rank';
+    const rankLabel = i === 0 ? '★' : String(i + 1);
+    const goldClass = i === 0 ? 'gold' : '';
+    const barWidth = career.match + '%';
+    const icon = getCareerIcon(career.career);
+
+    card.innerHTML =
+      '<div class="' + rankClass + '">' + rankLabel + '</div>' +
+      '<div class="career-icon">' + icon + '</div>' +
+      '<div class="career-info"><h4>' + career.career + '</h4><p>Match based on your profile</p></div>' +
+      '<div class="career-bar-wrap">' +
+        '<div class="career-bar">' +
+          '<div class="career-bar-fill ' + goldClass + '" style="width:0%" data-width="' + barWidth + '"></div>' +
+        '</div>' +
+        '<div class="career-pct ' + goldClass + '">' + career.match + '%</div>' +
+      '</div>';
+
+    container.appendChild(card);
+  });
+
+  // Animate bars
+  setTimeout(function() {
+    document.querySelectorAll('.career-bar-fill').forEach(function(b) {
+      b.style.width = b.dataset.width;
+    });
+  }, 100);
+}
+
+function getCareerIcon(careerName) {
+  const iconMap = {
+    'Software Developer': '💻',
+    'Software Engineer': '💻',
+    'Data Scientist': '📊',
+    'Graphic Designer': '🎨',
+    'Marketing Specialist': '📱',
+    'Network Administrator': '🌐',
+    'Accountant': '📈',
+    'Cybersecurity Analyst': '🔒',
+    'Healthcare Professional': '🏥',
+    'Mechanical Engineer': '⚙️',
+    'Teacher': '📚'
+  };
+  return iconMap[careerName] || '💼';
+}
+
+function buildResults() {
+  const container = document.getElementById('careerCards');
+  container.innerHTML = '';
+  careers.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'career-card';
+    card.style.animationDelay = (i * 0.08) + 's';
+
+    // Pre-compute class names and values to avoid quotes inside template literals
+    const rankClass  = i === 0 ? 'career-rank first' : 'career-rank';
+    const rankLabel  = i === 0 ? '★' : String(i + 1);
+    const goldClass  = c.gold ? 'gold' : '';
+    const barWidth   = c.pct + '%';
+
+    card.innerHTML =
+      '<div class="' + rankClass + '">' + rankLabel + '</div>' +
+      '<div class="career-icon">' + c.icon + '</div>' +
+      '<div class="career-info"><h4>' + c.title + '</h4><p>' + c.desc + '</p></div>' +
+      '<div class="career-bar-wrap">' +
+        '<div class="career-bar">' +
+          '<div class="career-bar-fill ' + goldClass + '" style="width:0%" data-width="' + barWidth + '"></div>' +
+        '</div>' +
+        '<div class="career-pct ' + goldClass + '">' + c.pct + '%</div>' +
+      '</div>';
+
+    container.appendChild(card);
+  });
+  // Animate bars after a short delay so the DOM is ready
+  setTimeout(function() {
+    document.querySelectorAll('.career-bar-fill').forEach(function(b) {
+      b.style.width = b.dataset.width;
+    });
+  }, 100);
+}
+</script>
+</body>
+</html>

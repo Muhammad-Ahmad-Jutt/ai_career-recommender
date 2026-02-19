@@ -3,7 +3,7 @@ import joblib
 from custom_transformers import MultiColumnTransformer
 
 # Load model
-model = joblib.load("career_recommendation_model.pkl")
+model = joblib.load(r"C:\Users\Muhammad Waseem\OneDrive\Desktop\ai_recommender\ai_career-recommender\career_recommendation_model.pkl")
 
 # Create test samples
 test_samples = pd.DataFrame([
