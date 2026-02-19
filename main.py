@@ -2,113 +2,6 @@ import pandas as pd
 import joblib
 from typing import List, Dict, Any
 
-# Load model once (global for Flask performance)
-model = joblib.load(r"C:\Users\Muhammad Waseem\OneDrive\Desktop\ai_recommender\ai_career-recommender\career_recommendation_model.pkl")
-
-
-def predict_career(person: Dict[str, Any]) -> str:
-    """
-    Predict recommended career for a single person using trained ML model.
-
-    This function is designed to be easily integrated into a Flask API.
-    It performs strict validation of input data types and required fields
-    before sending data to the model.
-
-    Parameters
-    ----------
-    person : dict
-        Dictionary containing person details with following keys:
-
-        {
-            "Age": int,
-            "Education": str,
-            "Skills": List[str],
-            "Personality_Traits": List[str],
-            "Years_of_Experience": int
-        }
-
-        Example:
-        {
-            "Age": 24,
-            "Education": "Bachelor",
-            "Skills": ["Python", "Machine Learning"],
-            "Personality_Traits": ["Analytical", "Creative"],
-            "Years_of_Experience": 1
-        }
-
-    Returns
-    -------
-    str
-        Recommended career predicted by AI model.
-
-    Raises
-    ------
-    ValueError
-        If required fields are missing or data types are incorrect.
-
-    TypeError
-        If input is not a dictionary.
-
-    Usage in Flask
-    --------------
-    You can call this function inside Flask POST API:
-
-        data = request.json
-        result = predict_career(data)
-        return jsonify({"recommended_career": result})
-    """
-
-    # ----------------------------
-    # 1. Input must be dictionary
-    # ----------------------------
-    if not isinstance(person, dict):
-        raise TypeError("Input must be a dictionary containing person details.")
-
-    # ----------------------------
-    # 2. Required fields
-    # ----------------------------
-    required_fields = [
-        "Age",
-        "Education",
-        "Skills",
-        "Personality_Traits",
-        "Years_of_Experience"
-    ]
-
-    for field in required_fields:
-        if field not in person:
-            raise ValueError(f"Missing required field: {field}")
-
-    # ----------------------------
-    # 3. Data type validation
-    # ----------------------------
-    if not isinstance(person["Age"], int):
-        raise ValueError("Age must be integer")
-
-    if not isinstance(person["Education"], str):
-        raise ValueError("Education must be string")
-
-    if not isinstance(person["Skills"], list) or not all(isinstance(s, str) for s in person["Skills"]):
-        raise ValueError("Skills must be list of strings")
-
-    if not isinstance(person["Personality_Traits"], list) or not all(isinstance(p, str) for p in person["Personality_Traits"]):
-        raise ValueError("Personality_Traits must be list of strings")
-
-    if not isinstance(person["Years_of_Experience"], int):
-        raise ValueError("Years_of_Experience must be integer")
-
-    # ----------------------------
-    # 4. Convert to DataFrame
-    # ----------------------------
-    input_df = pd.DataFrame([person])
-
-    # ----------------------------
-    # 5. Predict using model
-    # ----------------------------
-    prediction = model.predict(input_df)
-    print(f"Model prediction: {prediction}")
-    # Return single result
-    return str(prediction[0])
 
 
 
@@ -130,8 +23,8 @@ app.secret_key = 'careerai_secret_key_2025'
 MODEL_PATH = os.path.join(os.path.dirname(__file__), 'career_recommendation_model.pkl')
 model = None
 try:
-    with open(MODEL_PATH, 'rb') as f:
-        model = pickle.load(f)
+    model = joblib.load(MODEL_PATH)
+    print("✅ Model loaded successfully!")
     print("✅ Model loaded successfully!")
     print(f"   Model type: {type(model).__name__}")
 
@@ -208,6 +101,7 @@ def run_model_prediction(age, education, skills, personality_traits, experience_
 
     try:
         # Convert comma-separated strings to lists (same as training data)
+        skills = skills or ""
         skills_list = [s.strip() for s in skills.split(',') if s.strip()]
         personality_list = [p.strip() for p in personality_traits.split(',') if p.strip()]
 
@@ -235,8 +129,8 @@ def run_model_prediction(age, education, skills, personality_traits, experience_
         print(f"\nDataFrame dtypes:\n{input_df.dtypes}\n")
 
         # Get predictions with probabilities
-        if hasattr(model, 'predict_proba'):
-            probabilities = model.predict(input_df)[0]
+        if hasattr(model, "predict_proba"):
+            probabilities = model.predict_proba(input_df)[0]
             classes = model.classes_
 
             # Create results
